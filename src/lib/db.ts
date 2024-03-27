@@ -89,8 +89,8 @@ export async function createCategory(name: string, user_id: number) {
     return query('INSERT INTO categories (name, user_id) VALUES ($1, $2)', [name, user_id]);
 }
 
-export async function updateCategory(id: number, name: string, user_id: number) {
-    return query('UPDATE categories SET name = $2, user_id = $3 WHERE id = $1', [id, name, user_id]);
+export async function updateCategory(name: string, user_id: number) {
+    return query('UPDATE categories SET name = $2, user_id = $3 WHERE id = $1', [name, user_id]);
 }
 
 export async function deleteCategory(id: number) {
