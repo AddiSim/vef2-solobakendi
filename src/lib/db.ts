@@ -109,6 +109,7 @@ export async function getCategoriesByUserID(user_id: number) {
 
 export async function createTransaction(user_id: number, category_id: number, amount: number, description: string, transaction_date: Date) {
     return query('INSERT INTO transactions (user_id, category_id, amount, description, transaction_date) VALUES ($1, $2, $3, $4, $5)', [user_id, category_id, amount, description, transaction_date]);
+    console.log(query);
 }
 
 export async function updateTransaction(id: number, user_id: number, category_id: number, amount: number, description: string, transaction_date: Date) {

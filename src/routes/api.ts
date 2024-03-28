@@ -1,6 +1,5 @@
 import dotenv from 'dotenv';
 import express, { Request, Response, NextFunction } from 'express';
-import { catchErrors } from 'src/lib/catch-errors';
 import bcrypt from 'bcrypt';
 import { 
     createUserHandler,
@@ -18,8 +17,16 @@ import {
     deleteTransactionHandler,
     getTransactionByIDHandler,
     getTransactionsByUserIDHandler,
-    getTransactionsByCategoryIDHandler
-} from 'src/lib/crud';
+    getTransactionsByCategoryIDHandler,
+    createBudgetHandler,
+    updateBudgetHandler,
+    deleteBudgetHandler,
+    getBudgetByIDHandler,
+    getBudgetsByUserIDHandler,
+    getBudgetsByCategoryIDHandler,
+    getBudgetsByPeriodStartHandler,
+    getBudgetsByPeriodEndHandler,
+} from '../lib/crud.js';
 
 dotenv.config();
 
@@ -78,6 +85,36 @@ export async function index(req: Request, res: Response) {
             description: 'Endpoint to retrieve all transactions for a specific category ID.',
         },
         {
+            href: '/budgets',
+            method: ['POST'],
+            description: 'Endpoint to create a new budget.',
+        },
+        {
+            href: '/budgets/:id',
+            method: ['GET', 'PATCH', 'DELETE'],
+            description: 'Endpoints for operating on a specific budgets by ID. GET to retrieve, PATCH to update, DELETE to remove.',
+        },
+        {
+            href: '/budgets/user/:user_id',
+            method: ['GET'],
+            description: 'Endpoint to retrieve all budgets for a specific user ID.',
+        },
+        {
+            href: '/budgets/category/:category_id',
+            method: ['GET'],
+            description: 'Endpoint to retrieve all budgets for a specific category ID.',
+        },
+        {
+            href: '/budgets/period_start/:period_start',
+            method: ['GET'],
+            description: 'Endpoint to retrieve all budgets for a specific period start.',
+        },
+        {
+            href: '/budgets/period_end/:period_end',
+            method: ['GET'],
+            description: 'Endpoint to retrieve all budgets for a specific period end.',
+        },
+        {
             href: '/login',
             method: ['POST'],
             description: 'Endpoint for user login.',
@@ -107,3 +144,12 @@ router.delete('/transactions/:id', deleteTransactionHandler);
 router.get('/transactions/:id', getTransactionByIDHandler);
 router.get('/transactions/user/:user_id', getTransactionsByUserIDHandler);
 router.get('/transactions/category/:category_id', getTransactionsByCategoryIDHandler);
+// Budget Routes
+router.post('/budgets', createBudgetHandler);
+router.patch('/budgets/:id', updateBudgetHandler);
+router.delete('/budgets/:id', deleteBudgetHandler);
+router.get('/budgets/:id', getBudgetByIDHandler);
+router.get('/budgets/user/:user_id', getBudgetsByUserIDHandler);
+router.get('/budgets/category/:category_id', getBudgetsByCategoryIDHandler);
+router.get('/budgets/period_start/:period_start', getBudgetsByPeriodStartHandler);
+router.get('/budgets/period_end/:period_end', getBudgetsByPeriodEndHandler);

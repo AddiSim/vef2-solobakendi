@@ -15,7 +15,11 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "nodemon",
+		"test": "jest --coverage --forceExit",
+		"setup": "node --loader ts-node/esm ./src/setup.ts",
+		"lint": "eslint . --ext .ts",
+		"start": "node --loader ts-node/esm ./src/app.ts"
   },
   "author": "",
   "license": "ISC",

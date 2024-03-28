@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { hashPassword } from "./authUtils";
+import { hashPassword } from "./authUtils.js";
 import {
     createUser,
     updateUser,
@@ -17,7 +17,15 @@ import {
     getTransactionByID,
     getTransactionsByUserID,
     getTransactionsByCategoryID,
-} from "./db";
+    createBudget,
+    updateBudget,
+    deleteBudget,
+    getBudgetByID,
+    getBudgetsByUserID,
+    getBudgetsByCategoryID,
+    getBudgetsByPeriodStart,
+    getBudgetsByPeriodEnd,
+} from "./db.js";
 import { body } from "express-validator";
 
 // User Handlers
@@ -94,9 +102,10 @@ export async function getCategoriesByUserIDHandler(req: Request, res: Response, 
 
 // Transaction Handlers
 export async function createTransactionHandler(req: Request, res: Response, next: NextFunction) {
-    const { name, amount, date, category_id, user_id } = req.body;
-    const transaction = await createTransaction(name, amount, date, category_id, user_id);
+    const { user_id, category_id, amount, description, transaction_date} = req.body;
+    const transaction = await createTransaction(user_id, category_id, amount, description, transaction_date);
     return res.json(transaction);
+    console.log(transaction);
 }
 
 export async function updateTransactionHandler(req: Request, res: Response, next: NextFunction) {
@@ -130,3 +139,55 @@ export async function getTransactionsByCategoryIDHandler(req: Request, res: Resp
     return res.json(transactions);
 }
 
+// Budget Handlers
+
+export async function createBudgetHandler(req: Request, res: Response, next: NextFunction) {
+    const { user_id, category_id, amount, period_start, period_end } = req.body;
+    const budget = await createBudget(user_id, category_id, amount, period_start, period_end);
+    return res.json(budget);
+}
+
+export async function updateBudgetHandler(req: Request, res: Response, next: NextFunction) {
+    const { id } = req.params;
+    const { user_id, category_id, amount, period_start, period_end } = req.body;
+    const budget = await updateBudget(parseInt(id), user_id, category_id, amount, period_start, period_end);
+    return res.json(budget);
+}
+
+export async function deleteBudgetHandler(req: Request, res: Response, next: NextFunction) {
+    const { id } = req.params;
+    const budget = await deleteBudget(parseInt(id));
+    return res.json(budget);
+}
+
+export async function getBudgetByIDHandler(req: Request, res: Response, next: NextFunction) {
+    const { id } = req.params;
+    const budget = await getBudgetByID(parseInt(id));
+    return res.json(budget);
+}
+
+export async function getBudgetsByUserIDHandler(req: Request, res: Response, next: NextFunction) {
+    const { user_id } = req.params;
+    const budgets = await getBudgetsByUserID(parseInt(user_id));
+    return res.json(budgets);
+}
+
+export async function getBudgetsByCategoryIDHandler(req: Request, res: Response, next: NextFunction) {
+    const { category_id } = req.params;
+    const budgets = await getBudgetsByCategoryID(parseInt(category_id));
+    return res.json(budgets);
+}
+
+export async function getBudgetsByPeriodStartHandler(req: Request, res: Response, next: NextFunction) {
+    const { period_start } = req.params;
+    const date = new Date(period_start);
+    const budgets = await getBudgetsByPeriodStart(date);
+    return res.json(budgets);
+}
+
+export async function getBudgetsByPeriodEndHandler(req: Request, res: Response, next: NextFunction) {
+    const { period_end } = req.params;
+    const date = new Date(period_end);
+    const budgets = await getBudgetsByPeriodEnd(date);
+    return res.json(budgets);
+}
