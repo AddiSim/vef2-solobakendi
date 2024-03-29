@@ -6,6 +6,13 @@ import { readFile } from 'fs/promises';
 const SCHEMA_FILE = './sql/schema.sql';
 const DROP_SCHEMA_FILE = './sql/drop.sql';
 
+interface IUser {
+	id: number;
+	username: string;
+    email: string;
+	password_hash: string;
+}
+
 const env = environment(process.env, logger);
 
 const sslConfig = {
@@ -63,6 +70,19 @@ export async function createSchema(schemaFile = SCHEMA_FILE) {
 }
 
 // user functions
+
+export async function loginUser(username: string): Promise<IUser | null> {
+	const queryText = 'SELECT * FROM Users WHERE username = $1';
+	try {
+		const { rows } = await pool.query<IUser>(queryText, [username]);
+		if (rows.length === 0) return null;
+		return rows[0];
+	} catch (error) {
+		console.error('Failed to retrieve user by username:', error);
+		throw error;
+	}
+}
+
 export async function createUser(username: string, email: string, password_hash: string) {
     return query('INSERT INTO users (username, email, password_hash) VALUES ($1, $2, $3)', [username, email, password_hash]);
 }
@@ -97,6 +117,10 @@ export async function deleteCategory(id: number) {
     return query('DELETE FROM categories WHERE id = $1', [id]);
 }
 
+export async function getCategories() {
+    return query('SELECT * FROM categories');
+}
+
 export async function getCategoryByID(id: number) {
     return query('SELECT * FROM categories WHERE id = $1', [id]);
 }
@@ -118,6 +142,10 @@ export async function updateTransaction(id: number, user_id: number, category_id
 
 export async function deleteTransaction(id: number) {
     return query('DELETE FROM transactions WHERE id = $1', [id]);
+}
+
+export async function getTransactions() {
+    return query('SELECT * FROM transactions');
 }
 
 export async function getTransactionByID(id: number) {
@@ -144,6 +172,10 @@ export async function updateBudget(id: number, user_id: number, category_id: num
 
 export async function deleteBudget(id: number) {
     return query('DELETE FROM budgets WHERE id = $1', [id]);
+}
+
+export async function getBudgets() {
+    return query('SELECT * FROM budgets');
 }
 
 export async function getBudgetByID(id: number) {

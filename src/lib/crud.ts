@@ -9,17 +9,20 @@ import {
     createCategory,
     updateCategory,
     deleteCategory,
+    getCategories,
     getCategoryByID,
     getCategoriesByUserID,
     createTransaction,
     updateTransaction,
     deleteTransaction,
+    getTransactions,
     getTransactionByID,
     getTransactionsByUserID,
     getTransactionsByCategoryID,
     createBudget,
     updateBudget,
     deleteBudget,
+    getBudgets,
     getBudgetByID,
     getBudgetsByUserID,
     getBudgetsByCategoryID,
@@ -88,6 +91,11 @@ export async function deleteCategoryHandler(req: Request, res: Response, next: N
     return res.json(category);
 }
 
+export async function getCategoriesHandler(req: Request, res: Response, next: NextFunction) {
+    const categories = await getCategories();
+    return res.json(categories);
+}
+
 export async function getCategoryByIDHandler(req: Request, res: Response, next: NextFunction) {
     const { id } = req.params;
     const category = await getCategoryByID(parseInt(id));
@@ -105,7 +113,6 @@ export async function createTransactionHandler(req: Request, res: Response, next
     const { user_id, category_id, amount, description, transaction_date} = req.body;
     const transaction = await createTransaction(user_id, category_id, amount, description, transaction_date);
     return res.json(transaction);
-    console.log(transaction);
 }
 
 export async function updateTransactionHandler(req: Request, res: Response, next: NextFunction) {
@@ -119,6 +126,11 @@ export async function deleteTransactionHandler(req: Request, res: Response, next
     const { id } = req.params;
     const transaction = await deleteTransaction(parseInt(id));
     return res.json(transaction);
+}
+
+export async function getTransactionsHandler(req: Request, res: Response, next: NextFunction) {
+    const transactions = await getTransactions();
+    return res.json(transactions);
 }
 
 export async function getTransactionByIDHandler(req: Request, res: Response, next: NextFunction) {
@@ -158,6 +170,11 @@ export async function deleteBudgetHandler(req: Request, res: Response, next: Nex
     const { id } = req.params;
     const budget = await deleteBudget(parseInt(id));
     return res.json(budget);
+}
+
+export async function getBudgetsHandler(req: Request, res: Response, next: NextFunction) {
+    const budgets = await getBudgets();
+    return res.json(budgets);
 }
 
 export async function getBudgetByIDHandler(req: Request, res: Response, next: NextFunction) {

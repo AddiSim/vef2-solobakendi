@@ -1,6 +1,9 @@
 import dotenv from 'dotenv';
 import express, { Request, Response, NextFunction } from 'express';
 import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
+import { authenticate } from '../lib/auth.js';
+import { loginUser } from '../lib/db.js';
 import { 
     createUserHandler,
     updateUserHandler,
@@ -10,17 +13,20 @@ import {
     createCategoryHandler,
     updateCategoryHandler,
     deleteCategoryHandler,
+    getCategoriesHandler,
     getCategoryByIDHandler,
     getCategoriesByUserIDHandler,
     createTransactionHandler,
     updateTransactionHandler,
     deleteTransactionHandler,
+    getTransactionsHandler,
     getTransactionByIDHandler,
     getTransactionsByUserIDHandler,
     getTransactionsByCategoryIDHandler,
     createBudgetHandler,
     updateBudgetHandler,
     deleteBudgetHandler,
+    getBudgetsHandler,
     getBudgetByIDHandler,
     getBudgetsByUserIDHandler,
     getBudgetsByCategoryIDHandler,
@@ -51,7 +57,7 @@ export async function index(req: Request, res: Response) {
         },
         {
             href: '/categories',
-            method: ['POST'],
+            method: ['GET','POST'],
             description: 'Endpoint to create a new category.',
         },
         {
@@ -66,7 +72,7 @@ export async function index(req: Request, res: Response) {
         },
         {
             href: '/transactions',
-            method: ['POST'],
+            method: ['GET','POST'],
             description: 'Endpoint to create a new transaction.',
         },
         {
@@ -86,7 +92,7 @@ export async function index(req: Request, res: Response) {
         },
         {
             href: '/budgets',
-            method: ['POST'],
+            method: ['GET','POST'],
             description: 'Endpoint to create a new budget.',
         },
         {
@@ -125,31 +131,51 @@ export async function index(req: Request, res: Response) {
 
 router.get('/', index);
 
+router.post('/login', async (req, res) => {
+	const { username, password } = req.body;
+	const user = await loginUser(username);
+	if (!user) {
+		return res.status(401).json({ error: 'Login failed' });
+	}
+
+	const secret = process.env.JWT_SECRET || 'default-secret';
+	const match = await bcrypt.compare(password, user.password_hash);
+	if (match) {
+		const token = jwt.sign({ id: user.id }, secret, { expiresIn: '1h' });
+        res.status(200).json({ token, user: { id: user.id, username: user.username } });
+	} else {
+		res.status(401).json({ error: 'Login failed' });
+	}
+});
+
 // User Routes
 router.post('/users', createUserHandler);
-router.patch('/users/:id', updateUserHandler);
-router.delete('/users/:id', deleteUserHandler);
+router.patch('/users/:id', authenticate, updateUserHandler);
+router.delete('/users/:id', authenticate, deleteUserHandler);
 router.get('/users/:id', getUserByIDHandler);
 router.get('/users/username/:username', getUserByUsernameHandler);
 // Category Routes
 router.post('/categories', createCategoryHandler);
-router.patch('/categories/:id', updateCategoryHandler);
-router.delete('/categories/:id', deleteCategoryHandler);
-router.get('/categories/:id', getCategoryByIDHandler);
-router.get('/categories/user/:user_id', getCategoriesByUserIDHandler);
+router.patch('/categories/:id', authenticate, updateCategoryHandler);
+router.delete('/categories/:id', authenticate, deleteCategoryHandler);
+router.get('/categories', authenticate, getCategoriesHandler);
+router.get('/categories/:id', authenticate, getCategoryByIDHandler);
+router.get('/categories/user/:user_id', authenticate, getCategoriesByUserIDHandler);
 // Transaction Routes
 router.post('/transactions', createTransactionHandler);
-router.patch('/transactions/:id', updateTransactionHandler);
-router.delete('/transactions/:id', deleteTransactionHandler);
-router.get('/transactions/:id', getTransactionByIDHandler);
-router.get('/transactions/user/:user_id', getTransactionsByUserIDHandler);
-router.get('/transactions/category/:category_id', getTransactionsByCategoryIDHandler);
+router.patch('/transactions/:id', authenticate, updateTransactionHandler);
+router.delete('/transactions/:id', authenticate,  deleteTransactionHandler);
+router.get('/transactions', authenticate, getTransactionsHandler);
+router.get('/transactions/:id',authenticate,  getTransactionByIDHandler);
+router.get('/transactions/user/:user_id', authenticate, getTransactionsByUserIDHandler);
+router.get('/transactions/category/:category_id', authenticate,  getTransactionsByCategoryIDHandler);
 // Budget Routes
-router.post('/budgets', createBudgetHandler);
-router.patch('/budgets/:id', updateBudgetHandler);
-router.delete('/budgets/:id', deleteBudgetHandler);
-router.get('/budgets/:id', getBudgetByIDHandler);
-router.get('/budgets/user/:user_id', getBudgetsByUserIDHandler);
-router.get('/budgets/category/:category_id', getBudgetsByCategoryIDHandler);
-router.get('/budgets/period_start/:period_start', getBudgetsByPeriodStartHandler);
-router.get('/budgets/period_end/:period_end', getBudgetsByPeriodEndHandler);
+router.post('/budgets', authenticate, createBudgetHandler);
+router.patch('/budgets/:id', authenticate, updateBudgetHandler);
+router.delete('/budgets/:id', authenticate, deleteBudgetHandler);
+router.get('/budgets', authenticate, getBudgetsHandler);
+router.get('/budgets/:id', authenticate, getBudgetByIDHandler);
+router.get('/budgets/user/:user_id', authenticate, getBudgetsByUserIDHandler);
+router.get('/budgets/category/:category_id', authenticate, getBudgetsByCategoryIDHandler);
+router.get('/budgets/period_start/:period_start', authenticate, getBudgetsByPeriodStartHandler);
+router.get('/budgets/period_end/:period_end', authenticate, getBudgetsByPeriodEndHandler);
